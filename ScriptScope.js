@@ -216,7 +216,7 @@ function startAutoChop() {
 /****************
 *   Fishing Logic
 *****************/
-function generatefishingContent() {
+function generateFishingContent() {
   return '\
   <div id="automationFishingContent">\
     Shrimp: <input type="number" id="autoFish_0" min="1" max="13"></br>\
@@ -258,7 +258,7 @@ function startAutoFish() {
       for(i=0; i<autoFishPriority.length; i++) { // For fish in priority
         let best_loc = 0;
         let best_chance = 0;
-        for(j=0; j<=8; j++) { // For each fishing area
+        for(j=0; j<8; j++) { // For each fishing area
           let local_chance = fishingArea[j].currentFish.filter(x => x == autoFishPriority[i]).length / fishingArea[j].currentFish.length;
           if(local_chance > best_chance) {
             best_chance = local_chance;
