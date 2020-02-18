@@ -56,9 +56,10 @@ function updateDOM() {
           <div id="horizontal-navigation-scripting" class="d-none d-lg-block mt-w mt-lg-0"> \
             <ul class="nav-main nav-main-horizontal nav-main-hover nav-main-horizontal-center">' +
               // This is where new functionality gets added to the navigation menu
-              generateScriptNavItem("Woodcutting", "assets/media/skills/woodcutting/woodcutting.svg", 0) +
-              generateScriptNavItem("Combat", "assets/media/skills/combat/combat.svg", 1) +
-              generateScriptNavItem("Mining", "assets/media/skills/mining/mining.svg", 2) +
+              generateScriptNavItem("Combat", "assets/media/skills/combat/combat.svg", 0) +
+              generateScriptNavItem("Woodcutting", "assets/media/skills/woodcutting/woodcutting.svg", 1) +
+              generateScriptNavItem("Fishing", "assets/media/skills/fishing/fishing.svg", 2) +
+              generateScriptNavItem("Mining", "assets/media/skills/mining/mining.svg", 3) +
             '</ul> \
           </div> \
         </div> \
@@ -68,9 +69,10 @@ function updateDOM() {
           <div class="row no-gutters" id="automation-category-container">' +
             // This defines what is displayed in the main content window when
             // the respective navigation item is clicked.
-            generateScriptContent(0, generateWoodcuttingContent()) +
-            generateScriptContent(1, generateCombatContent()) +
-            generateScriptContent(2, generateMiningContent()) +
+            generateScriptContent(0, generateCombatContent()) +
+            generateScriptContent(1, generateWoodcuttingContent()) +
+            generateScriptContent(2, generateFishingContent()) +
+            generateScriptContent(3, generateMiningContent()) +
           '</div> \
         </div> \
       </div> \
@@ -91,7 +93,7 @@ function updateDOM() {
 // Create Handler for switching categories in Script Options
 function automationCategory(cat) {
   // Be sure this value matches the actual number of categories
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < $('#automation-category-container div').length; i++) {
     $("#automation-category-" + i).addClass("d-none");
   }
 
@@ -125,17 +127,9 @@ function generateScriptContent(pos, content) {
   </div>'
 }
 
-/*
-    Woodcutting Logic
-*/
-function generateWoodcuttingContent() {
-  return '\
-  <p>Hello Woodcutting World</p>'
-}
-
-/*
-    Combat Logic
-*/
+/***************
+*   Combat Logic
+****************/
 function generateCombatContent() {
   return '\
   <div id=automationCombatContent">\
@@ -179,9 +173,116 @@ function startAutoCombat() {
   }
 }
 
-/*
-    Mining Logic
-*/
+/********************
+*   Woodcutting Logic
+*********************/
+function generateWoodcuttingContent() {
+  return '\
+  <div id="automationWoodCuttingContent">\
+    <p>Select which tree to harvest. If you\'ve bought the perk, you can select two.</br>\
+    Only the first one (or two) checked will be used.</br>\
+    I understand this isn\'t super useful, but I wanted something for each skill.</p></br>\
+    Normal: <input type="checkbox" id="autoChop_0"></br>\
+    Oak: <input type="checkbox" id="autoChop_1"></br>\
+    Willow: <input type="checkbox" id="autoChop_2"></br>\
+    Teak: <input type="checkbox" id="autoChop_3"></br>\
+    Maple: <input type="checkbox" id="autoChop_4"></br>\
+    Mahogany: <input type="checkbox" id="autoChop_5"></br>\
+    Yew: <input type="checkbox" id="autoChop_6"></br>\
+    Magic: <input type="checkbox" id="autoChop_7"></br>\
+    Redwood: <input type="checkbox" id="autoChop_8"></br>\
+    <button onclick="startAutoChop()">Chop Selected Tree(s)</button>\
+  </div>'
+}
+
+function startAutoChop() {
+  // Clear any that we're already harvesting
+  for(i=0; i<=8; i++) {
+    if(treeCuttingHandler[i] != null) {
+      cutTree(i, false);
+    }
+  }
+  // Start the ones we want
+  for(i=0; i<=8; i++) {
+    if($('#autoChop_' + i).is(':checked')) {
+      cutTree(i, false);
+    }
+    if(treeCuttingHandler.filter(x => x != null).length == treeCutLimit) {
+      break;
+    }
+  }
+}
+
+/****************
+*   Fishing Logic
+*****************/
+function generatefishingContent() {
+  return '\
+  <div id="automationFishingContent">\
+    Shrimp: <input type="number" id="autoFish_0" min="1" max="13"></br>\
+    Sardine: <input type="number" id="autoFish_1" min="1" max="13"></br>\
+    Herring: <input type="number" id="autoFish_2" min="1" max="13"></br>\
+    Trout: <input type="number" id="autoFish_3" min="1" max="13"></br>\
+    Salmon: <input type="number" id="autoFish_4" min="1" max="13"></br>\
+    Lobster: <input type="number" id="autoFish_5" min="1" max="13"></br>\
+    Swordfish: <input type="number" id="autoFish_6" min="1" max="13"></br>\
+    Crab: <input type="number" id="autoFish_7" min="1" max="13"></br>\
+    Shark: <input type="number" id="autoFish_8" min="1" max="13"></br>\
+    Cave Fish: <input type="number" id="autoFish_9" min="1" max="13"></br>\
+    Manta Ray: <input type="number" id="autoFish_10" min="1" max="13"></br>\
+    Whale: <input type="number" id="autoFish_11" min="1" max="13"></br>\
+    Treasure Chest: <input type="number" id="autoFish_12" min="1" max="13"></br>\
+    <button onclick="startAutoFish()">Toggle Auto Fishing</button>\
+  </div>'
+}
+
+var autoFishEnabled = false;
+var autoFishPriority = [];
+var autoFish;
+
+function startAutoFish() {
+  if(autoFishEnabled) {
+    clearInterval(autoFish);
+    autoFishEnabled = false;
+  }
+  else {
+    let orderedFish = [null, null, null, null, null, null, null, null, null, null, null, null, null];
+    for(i=0; i<13; i++) {
+      if($('#autoFish_'+i).val()) {
+        let order = $('#autoFish_'+i).val();
+        orderedFish[order] = i;
+      }
+    }
+    autoFishPriority = orderedFish.filter(x => x != null);
+    autoFish = setInterval(function() {
+      for(i=0; i<autoFishPriority.length; i++) { // For fish in priority
+        let best_loc = 0;
+        let best_chance = 0;
+        for(j=0; j<=8; j++) { // For each fishing area
+          let local_chance = fishingArea[j].currentFish.filter(x => x == autoFishPriority[i]).length / fishingArea[j].currentFish.length;
+          if(local_chance > best_chance) {
+            best_chance = local_chance;
+            best_loc = j;
+          }
+        }
+        if(best_chance > 0) {
+          if(currentlyFishingArea != best_loc) {
+            if(currentlyFishing) {
+              startFishing(currentlyFishingArea, false)
+            }
+            startFishing(best_loc, false)
+          }
+          break;
+        }
+      }
+    }, 1000);
+    autoFishEnabled = true;
+  }
+}
+
+/***************
+*   Mining Logic
+****************/
 function generateMiningContent() {
   return '\
   <div id="automationMiningContent">\
@@ -241,7 +342,7 @@ function startAutoMine() {
   }
 }
 
-/*
-    Start Execution
-*/
+/******************
+*   Start Execution
+*******************/
 updateDOM();
