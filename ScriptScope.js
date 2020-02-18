@@ -155,6 +155,7 @@ var autoCombat;
 function startAutoCombat() {
   if(autoCombatEatEnabled) {
     clearInterval(autoCombat);
+    autoCombatEnabled = false;
   }
   else {
     autoCombatLootEnabled = $('#autoCombatLoot').is(':checked');
@@ -208,6 +209,7 @@ var autoMine;
 function startAutoMine() {
   if(autoMineEnabled) {
     clearInterval(autoMine);
+    autoMineEnabled = false;
   }
   else {
     autoMineAvailiable = $('#autoMineAvailiable').is(':checked');
